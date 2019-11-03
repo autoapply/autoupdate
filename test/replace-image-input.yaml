@@ -1,0 +1,10 @@
+          image: image-name
+          image: image-name:tag
+          image:  image-name
+          image:   image-name:tag
+          image: image-name  # comment
+          image: image-name:tag # comment
+          image: "image-name"
+          image: "image-name:tag"
+          image: 'image-name'
+          image: 'image-name:tag'
