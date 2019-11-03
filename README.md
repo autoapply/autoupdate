@@ -1,6 +1,6 @@
 # autoupdate
 
-[![Docker build status](https://img.shields.io/docker/build/autoapply/autoupdate.svg?style=flat-square)](https://hub.docker.com/r/autoapply/autoupdate/) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/autoapply/autoupdate/blob/master/LICENSE)
+[![Docker build status](https://img.shields.io/docker/cloud/build/autoapply/autoupdate.svg?style=flat-square)](https://hub.docker.com/r/autoapply/autoupdate/) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/autoapply/autoupdate/blob/master/LICENSE)
 
 Automatically update Git repositories.
 
