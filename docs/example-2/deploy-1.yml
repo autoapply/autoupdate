@@ -1,0 +1,17 @@
+name: Deploy on comment
+on:
+  issue_comment:
+    types: created
+jobs:
+  deploy:
+    name: Deploy
+    if: github.event.comment.body == '/deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        env:
+          AUTOUPDATE_URL: http://IP/update
+          AUTOUPDATE_AUTH: ${{ secrets.AUTOUPDATE_AUTH }}
+        run: |
+          pull_request="$(jq -er .issue.number "${GITHUB_EVENT_PATH}")"
+          curl -sS -u "${AUTOUPDATE_AUTH}" "${AUTOUPDATE_URL}?image=myapp&tag=pr-${pull_request}"

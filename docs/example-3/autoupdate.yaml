@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoupdate
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: autoupdate
+  template:
+    metadata:
+      labels:
+        app: autoupdate
+    spec:
+      containers:
+        - name: autoupdate
+          image: autoapply/autoapply:kubectl
+          args: ["env:AUTOUPDATE_CONFIG"]
+          envFrom:
+            - secretRef:
+                name: autoupdate-secret
+          env:
+            - name: AUTOUPDATE_CONFIG
+              value: |
+                call:
+                  path: /restart
+                  methods: ["POST"]
+                  authentication:
+                    env: USERS
+                  commands:
+                    - kubectl rollout restart "deployment.apps/${QUERY_DEPLOYMENT}"
+          ports:
+            - containerPort: 3000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: autoupdate
+  labels:
+    app: autoupdate
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: autoupdate

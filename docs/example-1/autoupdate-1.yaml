@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoupdate
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: autoupdate
+  template:
+    metadata:
+      labels:
+        app: autoupdate
+    spec:
+      containers:
+        - name: autoupdate
+          image: autoapply/autoupdate:latest
+          args: ["env:AUTOUPDATE_CONFIG"]
+          envFrom:
+            - configMapRef:
+                name: autoupdate-config
+            - secretRef:
+                name: autoupdate-secret
+          env:
+            - name: AUTOUPDATE_CONFIG
+              value: |
+                call:
+                  path: /update
+                  methods: ["POST"]
+                  authentication:
+                    env: USERS
+                  commands:
+                    - git clone "${REPOSITORY_URL}" "."
+                    - replace-image "${QUERY_IMAGE}" "${QUERY_TAG}" "${DEPLOYMENT_FILE}"
+                    - git commit -m "Deploy ${QUERY_IMAGE} ${QUERY_TAG}" "${DEPLOYMENT_FILE}"
+                    - git push
+          ports:
+            - containerPort: 3000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: autoupdate
+  labels:
+    app: autoupdate
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: autoupdate
