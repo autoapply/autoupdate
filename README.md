@@ -90,7 +90,7 @@ jobs:
 Remember to replace the `IP` with the external IP address of the autoupdate service (see example 1).
 Now the autoupdate call will be triggered every time someone adds a new comment with the text `/deploy` in a pull request.
 
-This example assumes that your Docker images are tagged with the pull request number, like `my-app:pr-123`. For another example, where the branch name is used instead, see [example-2/deploy-2.yml](docs/example-2/deploy-2.yml).
+This example assumes that your Docker images are tagged with the pull request number, like `myapp:pr-123`. For another example, where the branch name is used instead, see [example-2/deploy-2.yml](docs/example-2/deploy-2.yml).
 
 ### Example 3: Restart deployment when a new image has been pushed
 
@@ -122,13 +122,13 @@ az acr webhook create \
     --actions push \
     --name autoupdate \
     --registry myacr \
-    --scope "myimg:latest" \
+    --scope "myapp:latest" \
     --headers "Authorization=Basic 000000" \
     --uri "http://IP/restart?deployment=mydeployment"
 ```
 
 Make sure to set the correct authorization header. You can get the value from Kubernetes using `kubectl get secret autoupdate-secret -o 'jsonpath={.data.USERS}'`.
-Also remember to set `IP` to the external IP address of the autoupdate service and use the correct values instead of `myacr`, `myimg` and `mydeployment`.
+Also remember to set `IP` to the external IP address of the autoupdate service and use the correct values instead of `myacr`, `myapp` and `mydeployment`.
 
 Now, whenever the `latest` tag is pushed to the registry, autoupdate will restart the deployment, so that Kubernetes will run the new image.
 
@@ -137,7 +137,7 @@ Now, whenever the `latest` tag is pushed to the registry, autoupdate will restar
 In the previous examples, we used the external IP address of the service.
 To use the DNS name instead, you could have a look at the [external-dns project](https://github.com/kubernetes-sigs/external-dns).
 
-To automatically setup TLS for the service, see [caddy](https://github.com/caddyserver/caddy) or [traefik](https://github.com/containous/traefik).
+To automatically setup TLS for the service, you could use [caddy](https://github.com/caddyserver/caddy) or [traefik](https://github.com/containous/traefik).
 
 ## Docker tags
 
