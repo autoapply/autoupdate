@@ -1,0 +1,60 @@
+#!/bin/sh
+
+if [ "${1}" = "--help" ] || [ "${1}" = "-h" ]; then
+    echo "usage: ${0} <image> <tag> [<file>]"
+    echo
+    echo "Replace the Kubernetes image tag in the given input"
+    echo
+    echo "Positional arguments:"
+    echo "  <image>     The image name without tag, for example ubuntu"
+    echo "  <tag>       The new image tag, for example 19.10 or latest"
+    echo "  <file>      The file to edit, or standard input if unset"
+    echo
+    echo "For more information, visit https://github.com/autoapply/autoupdate"
+    exit 0
+fi
+
+if [ "${#}" -ne "2" ] && [ "${#}" -ne "3" ]; then
+    echo "usage: ${0} <image> <tag> [<file>]" >&2
+    echo "wrong number of arguments: ${#}" >&2
+    exit 1
+fi
+
+image_arg="${1}"
+tag_arg="${2}"
+file_arg="${3}"
+
+if [ -z "${image_arg}" ]; then
+    echo "image cannot be empty!" >&2
+    exit 1
+elif [ -z "${tag_arg}" ]; then
+    echo "tag cannot be empty!" >&2
+    exit 1
+fi
+
+input="$(cat "${file_arg:--}")"
+
+search_re="^([ ]+)image:([ ]+)(['\"])?${image_arg}(:[^ '\"]+)?(['\"])?"
+
+current_tag="$(echo "${input}" |
+    sed -nE "s;${search_re};\\4;gp" |
+    uniq)"
+
+if [ "${current_tag}" = ":${tag_arg}" ]; then
+    echo "tag '${tag_arg}' is already present: ${image_arg}${current_tag}" >&2
+    exit 78
+fi
+
+output="$(echo "${input}" |
+    sed -E "s;${search_re};\\1image:\\2\\3${image_arg}:${tag_arg}\\5;g")"
+
+if [ "${output}" = "${input}" ]; then
+    echo "no match found for image: ${image_arg}" >&2
+    exit 1
+fi
+
+if [ "${#}" -eq "2" ]; then
+    echo "${output}"
+else
+    echo "${output}" >"${file_arg}"
+fi
