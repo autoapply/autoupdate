@@ -4,6 +4,8 @@
 
 Automatically update Git repositories.
 
+![Technical overview](https://autoapply.github.io/autoupdate/overview.svg)
+
 ## Usage
 
 The common use case for autoupdate is to update Git repositories which contain Kubernetes resource files.
